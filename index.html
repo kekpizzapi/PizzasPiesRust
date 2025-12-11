@@ -252,12 +252,18 @@
 			color: #ffa726;
 			font-style: italic;
 		}
+		body {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: background-image 1s ease-in-out;
+}
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🍕 Pizza's Pies Rust 🍕</h1>
+            <h1><span style="text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);" >🍕 Pizza's Pies Rust 🍕</h1>
             <p class="subtitle">"Horse Kim Kardashian"</p>
         </header>
 
@@ -277,14 +283,14 @@
                     <span class="value" id="playerCount">Loading...</span>
                 </div>
                 <div class="howtojoin">
-                    <span class="label">Must have "Rust - Staging Branch aux01-staging" installed</span>
+                    <span class="label">Must have "Rust - Staging Branch aux01-staging" beta installed</span>
 
                 </div>
-				<a class="connect-btn" href="steam://run/700580//+connect%20108.88.140.124:43368">Launch Rust: Aux01 Staging</a> 
+				<a class="connect-btn" href="steam://run/700580">Launch Rust: Aux01 Staging</a> 
 
 				
                 <div class="howtojoin">
-                    <span class="label">Press F1 for console, paste the join command</span>
+                    <span class="label">Press F1 for console, paste the join command, hit enter</span>
 
                 </div>
 				<button class="connect-btn" onclick="copyIP(this)">Copy Join Command</button>	
@@ -294,15 +300,7 @@
                 <h2><span class="icon">⚙️</span> Server Settings</h2>
                 <div class="info-row">
                     <span class="label">Resource Rates:</span>
-                    <span class="value">5x</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">PvP:</span>
-                    <span class="value">Enabled</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Kits:</span>
-                    <span class="value">Ask Admin</span>
+                    <span class="value">Aux01 Requires Vanilla</span>
                 </div>
 				<div class="info-row">
                     <span class="label">Boats:</span>
@@ -321,7 +319,7 @@
         <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
         <div class="volume-control">
             <span>🔉</span>
-            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="10">
             <span>🔊</span>
         </div>
     </div>
@@ -334,15 +332,45 @@
             </div>
         </div>
 
-        <button class="connect-btn" onclick="window.open('https://discord.gg/GNXDMpfP', '_blank')">💬 Join Discord</button>
-
-        <footer>
-            <p>Free balls</p>
+        <!-- <button class="connect-btn" onclick="window.open('https://discord.gg/GNXDMpfP', '_blank')">💬 Join Discord</button> -->
+		<a class="connect-btn" href="https://discord.gg/GNXDMpfP" target="_blank" style="width: 300px; margin: 0 auto;">Join the Server Discord</a>
+		<div class="label" style="text-align: center; opacity: 0.1;" >or don't</div>
+        <footer> 
+		<p> </p>
         </footer>
     </div>
 
 
     <script>
+
+
+	const backgrounds = [
+		'url("images/1.jpg")',
+		'url("images/2.jpg")',
+		'url("images/3.jpg")',
+		'url("images/4.jpg")',
+		'url("images/5.jpg")',
+		'url("images/6.png")',
+		'url("images/7.png")',
+		'url("images/8.jpg")',
+		'url("images/9.jpg")',
+	];
+
+	let currentBgIndex = 0;
+
+function cycleBackground() {
+    currentBgIndex = (currentBgIndex + 1) % backgrounds.length;
+    document.body.style.backgroundImage = backgrounds[currentBgIndex];
+}
+
+// Set initial background
+document.body.style.backgroundImage = backgrounds[0];
+
+// Change background every 10 seconds (10000 milliseconds)
+setInterval(cycleBackground, 100000);
+
+
+
 
 	function copyIP(btn) {
 		const ip = 'client.connect 108.88.140.124:43368';
