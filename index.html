@@ -288,12 +288,17 @@
                 </div>
 				<a class="connect-btn" href="steam://run/700580">Launch Rust: Aux01 Staging</a> 
 
-				
+				<div class="info-row">
+				<span class="label">Copy this join command -> </span>
+				<span class="value">client.connect 108.88.140.124:43368</span>
+				</div>
                 <div class="howtojoin">
-                    <span class="label">Press F1 for console, paste the join command, hit enter</span>
+                    <span class="label">At the main menu, F1 for console, paste the join command, hit enter</span>
 
                 </div>
-				<button class="connect-btn" onclick="copyIP(this)">Copy Join Command</button>	
+				
+<!--				<button class="connect-btn" onclick="copyIP(this)">Copy Join Command</button>	 -->
+				
             </div>
 
             <div class="card">
@@ -314,7 +319,7 @@
 				
 				<div class="card">
     <h1><span class="icon">🔪</span> Slice Radio</h1>
-	<span class="label" >Ingame Radio Station</span>
+	<span class="label" >currently broken due to http problem</span>
     <div class="player-controls">
         <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
         <div class="volume-control">
@@ -334,7 +339,7 @@
 
         <!-- <button class="connect-btn" onclick="window.open('https://discord.gg/GNXDMpfP', '_blank')">💬 Join Discord</button> -->
 		<a class="connect-btn" href="https://discord.gg/GNXDMpfP" target="_blank" style="width: 300px; margin: 0 auto;">Join the Server Discord</a>
-		<div class="label" style="text-align: center; opacity: 0.1;" >or don't</div>
+		<div class="label" style="text-align: center; opacity: 0.3;" >or don't</div>
         <footer> 
 		<p> </p>
         </footer>
@@ -372,23 +377,23 @@ setInterval(cycleBackground, 100000);
 
 
 
-	function copyIP(btn) {
-		const ip = 'client.connect 108.88.140.124:43368';
-		const originalText = btn.textContent;
+<!--	function copyIP(btn) { -->
+<!--		const ip = 'client.connect 108.88.140.124:43368';
+<!--		const originalText = btn.textContent;
     
-		navigator.clipboard.writeText(ip).then(() => {
-			btn.textContent = '✓ IP Copied!';
-			setTimeout(() => {
-				btn.textContent = originalText;
-			}, 2000);
-		}).catch(err => {
-			console.error('Failed to copy:', err);
-			btn.textContent = '✓ IP Copied!';
-			setTimeout(() => {
-				btn.textContent = originalText;
-			}, 2000);
-		});
-	}
+<!--		navigator.clipboard.writeText(ip).then(() => {
+<!--			btn.textContent = '✓ IP Copied!';
+<!--			setTimeout(() => {
+<!--				btn.textContent = originalText;
+<!--			}, 2000);
+<!--		}).catch(err => {
+<!--			console.error('Failed to copy:', err);
+<!--			btn.textContent = '✓ IP Copied!';
+<!--			setTimeout(() => {
+<!--				btn.textContent = originalText;
+<!--			}, 2000);
+<!--		});
+<!--	}
 	const SERVER_ID = '36764850'; // Replace with your actual server ID
 
 	async function updateServerStatus() {try {
@@ -457,7 +462,7 @@ document.getElementById('volumeSlider').addEventListener('input', function(e) {
 
 function randomizeSubtitle() {
     const randomIndex = Math.floor(Math.random() * subtitles.length);
-    document.querySelector('.subtitle').textContent = subtitles[randomIndex];
+    document.querySelector('.subtitle').textContent = 'Confucius say "'+subtitles[randomIndex]+'"';
 }
 
 // Run when page loads
@@ -498,5 +503,3 @@ randomizeFooter();
     </script>
 </body>
 </html>
-
-
