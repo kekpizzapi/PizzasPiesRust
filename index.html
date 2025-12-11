@@ -277,7 +277,7 @@
                     <span class="value" id="playerCount">Loading...</span>
                 </div>
                 <div class="howtojoin">
-                    <span class="label">Must use "Staging Branch: Aux01 Staging"</span>
+                    <span class="label">Must have "Rust - Staging Branch aux01-staging" installed</span>
 
                 </div>
 				<a class="connect-btn" href="steam://run/700580//+connect%20108.88.140.124:43368">Launch Rust: Aux01 Staging</a> 
@@ -312,7 +312,25 @@
                     <span class="label">Purpose:</span>
                     <span class="value">Playing. And testing unreleased content</span>
                 </div>
-				<a class="connect-btn" href="http://108.88.140.124:43367/stream" target="_blank">📻 Slice Radio</a>
+				<!-- <a class="connect-btn" href="http://108.88.140.124:43367/stream" target="_blank">📻 Slice Radio</a> -->
+				
+				<div class="card">
+    <h1><span class="icon">🔪</span> Slice Radio</h1>
+	<span class="label" >Ingame Radio Station</span>
+    <div class="player-controls">
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
+        <div class="volume-control">
+            <span>🔉</span>
+            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
+            <span>🔊</span>
+        </div>
+    </div>
+    </div>
+	
+</div>
+				
+				
+				
             </div>
         </div>
 
@@ -361,6 +379,41 @@
             console.error('Error fetching server data:', error);
 		}
 	}
+	
+	
+	let audio = null;
+	let isPlaying = false;
+
+function togglePlay() {
+    const playBtn = document.getElementById('playBtn');
+    
+    if (!audio) {
+        audio = new Audio('http://108.88.140.124:43367/stream'); // Update with your stream URL
+        audio.volume = document.getElementById('volumeSlider').value / 100;
+    }
+
+    if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = '▶️';
+        isPlaying = false;
+    } else {
+        audio.play().catch(e => {
+            console.error('Playback failed:', e);
+        });
+        playBtn.textContent = '⏸️';
+        isPlaying = true;
+    }
+}
+
+document.getElementById('volumeSlider').addEventListener('input', function(e) {
+    if (audio) {
+        audio.volume = e.target.value / 100;
+    }
+});
+	
+	
+	
+	
 	const subtitles = [
     "Survive. Build. Dominate.",
     "Raid or be raided.",
