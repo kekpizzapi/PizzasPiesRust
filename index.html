@@ -258,7 +258,7 @@
     <div class="container">
         <header>
             <h1>🍕 Pizza's Pies Rust 🍕</h1>
-            <p class="subtitle">Scared Money Don’t Make Money</p>
+            <p class="subtitle">"Horse Kim Kardashian"</p>
         </header>
 
         <div class="content-grid">
@@ -287,9 +287,7 @@
                     <span class="label">Press F1 for console, paste the join command</span>
 
                 </div>
-                <button class="connect-btn" onclick="copyIP()">Copy Join Command</button>
-				<!-- <a class="steam-connect-button" href="steam://run/252490//+connect%20156.236.84.41:28041"><span>Connect via Steam</span> -->
-</a>			
+				<button class="connect-btn" onclick="copyIP(this)">Copy Join Command</button>	
             </div>
 
             <div class="card">
@@ -310,24 +308,14 @@
                     <span class="label">Boats:</span>
                     <span class="value">Boats</span>
                 </div>
-				
+				<div class="info-row">
+                    <span class="label">Purpose:</span>
+                    <span class="value">Playing. And testing unreleased content</span>
+                </div>
+				<a class="connect-btn" href="http://108.88.140.124:43367/stream" target="_blank">📻 Slice Radio</a>
             </div>
         </div>
 
-        <div class="radio-section">
-            <h2>📻 Slice Radio  </h2>
-            <div class="player-controls">
-                <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
-                <div class="volume-control">
-                    <span>🔉</span>
-                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="50">
-                    <span>🔊</span>
-                </div>
-            </div>
-            <div class="now-playing">
-                <div class="now-playing-label">Now Live</div>
-            </div>
-        </div>
         <button class="connect-btn" onclick="window.open('https://discord.gg/GNXDMpfP', '_blank')">💬 Join Discord</button>
 
         <footer>
@@ -337,49 +325,24 @@
 
 
     <script>
-        let audio = null;
-        let isPlaying = false;
 
-        function togglePlay() {
-            const playBtn = document.getElementById('playBtn');
-            
-            if (!audio) {
-                // Replace with your actual Icecast stream URL
-                audio = new Audio('http://108.88.140.124:43367/stream');
-                audio.volume = document.getElementById('volumeSlider').value / 100;
-            }
-
-            if (isPlaying) {
-                audio.pause();
-                playBtn.textContent = '▶️';
-                isPlaying = false;
-            } else {
-                audio.play().catch(e => {
-                    console.error('Playback failed:', e);
-                });
-                playBtn.textContent = '⏸️';
-                isPlaying = true;
-            }
-        }
-
-        document.getElementById('volumeSlider').addEventListener('input', function(e) {
-            if (audio) {
-                audio.volume = e.target.value / 100;
-            }
-        });
-		
-		
-    function copyIP() {
-            const ip = 'client.connect 108.88.140.124:43368';
-            navigator.clipboard.writeText(ip).then(() => {
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = '✓ IP Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            });
-        }
+	function copyIP(btn) {
+		const ip = 'client.connect 108.88.140.124:43368';
+		const originalText = btn.textContent;
+    
+		navigator.clipboard.writeText(ip).then(() => {
+			btn.textContent = '✓ IP Copied!';
+			setTimeout(() => {
+				btn.textContent = originalText;
+			}, 2000);
+		}).catch(err => {
+			console.error('Failed to copy:', err);
+			btn.textContent = '✓ IP Copied!';
+			setTimeout(() => {
+				btn.textContent = originalText;
+			}, 2000);
+		});
+	}
 	const SERVER_ID = '36764850'; // Replace with your actual server ID
 
 	async function updateServerStatus() {try {
@@ -398,6 +361,55 @@
             console.error('Error fetching server data:', error);
 		}
 	}
+	const subtitles = [
+    "Survive. Build. Dominate.",
+    "Raid or be raided.",
+    "Trust no one.",
+    "Loot. Craft. Repeat.",
+    "Every man for himself.",
+    "Build your empire.",
+    "The island awaits.",
+    "Adapt or die.",
+    "Fortune favors the bold.",
+    "Claim your territory."
+];
+
+function randomizeSubtitle() {
+    const randomIndex = Math.floor(Math.random() * subtitles.length);
+    document.querySelector('.subtitle').textContent = subtitles[randomIndex];
+}
+
+// Run when page loads
+randomizeSubtitle();
+
+	const rustPassiveAggressiveTips = [
+  "If you hear footsteps behind you, don’t worry — it’s probably just someone coming to ‘talk.’",
+  "Your base would be much safer if you remembered to put doors on both sides. Probably.",
+  "That guy you trusted? He didn’t trust you. Just something to think about.",
+  "Sleeping bags work best when you place more than one. You do die a lot, after all.",
+  "Wooden doors are great if you enjoy replacing them frequently.",
+  "Your furnace output increases significantly when you remember to take the smelted items out.",
+  "If your base was raided, look on the bright side: now it’s easier for you to remodel.",
+  "Bringing a bow to a gunfight is bold. Not smart, but bold.",
+  "Hydration is important. Too bad you never carry water.",
+  "If you keep forgetting an airlock, the raiders thank you for your continued support.",
+  "Hearing a rocket? Relax. It’s not always aimed at you. Only usually.",
+  "That voice in chat telling you to ‘come outside unarmed’? Definitely trustworthy.",
+  "You can save materials by not building so many windows. Everyone else can save bullets too.",
+  "Tool cupboards protect your base. Having one would really improve your situation.",
+  "Bags take 30 seconds to craft, but you dying takes less. Maybe plan accordingly.",
+  "If you stash loot in a bush, it instantly becomes community property.",
+  "Going deep on a base works better when you actually bring extra tools.",
+  "Most players won’t shoot you on sight. They’ll shoot you before they even see you.",
+  "Turrets need electricity to work. If only someone had told you.",
+  "If you keep losing fights, don’t worry — the other players really needed the confidence boost."
+];
+function randomizeFooter() {
+    const randomIndex = Math.floor(Math.random() * rustPassiveAggressiveTips.length);
+    document.querySelector('footer p').textContent = rustPassiveAggressiveTips[randomIndex];
+}
+
+randomizeFooter();
 
 // Update immediately and then every 30 seconds
 		updateServerStatus();
