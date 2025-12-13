@@ -320,15 +320,9 @@
 				
 				<div class="card">
     <h1><span class="icon">🔪</span> Slice Radio</h1>
-	<span class="label" >currently broken due to http problem</span>
-    <div class="player-controls">
-        <button class="play-btn" id="playBtn" onclick="togglePlay()">▶️</button>
-        <div class="volume-control">
-            <span>🔉</span>
-            <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="10">
-            <span>🔊</span>
-        </div>
-    </div>
+	<span class="label" >Custom Ingame Radio Station</span>
+	<a class="connect-btn" href="http://108.88.140.124:43367/stream" target="_blank">🎵Open Radio Stream🎵</a>
+    
     </div>
 	
 </div>
@@ -376,25 +370,6 @@ document.body.style.backgroundImage = backgrounds[0];
 setInterval(cycleBackground, 100000);
 
 
-
-
-<!--	function copyIP(btn) { -->
-<!--		const ip = 'client.connect 108.88.140.124:43368';
-<!--		const originalText = btn.textContent;
-    
-<!--		navigator.clipboard.writeText(ip).then(() => {
-<!--			btn.textContent = '✓ IP Copied!';
-<!--			setTimeout(() => {
-<!--				btn.textContent = originalText;
-<!--			}, 2000);
-<!--		}).catch(err => {
-<!--			console.error('Failed to copy:', err);
-<!--			btn.textContent = '✓ IP Copied!';
-<!--			setTimeout(() => {
-<!--				btn.textContent = originalText;
-<!--			}, 2000);
-<!--		});
-<!--	}
 	const SERVER_ID = '36764850'; // Replace with your actual server ID
 
 	async function updateServerStatus() {try {
@@ -418,26 +393,6 @@ setInterval(cycleBackground, 100000);
 	let audio = null;
 	let isPlaying = false;
 
-function togglePlay() {
-    const playBtn = document.getElementById('playBtn');
-    
-    if (!audio) {
-        audio = new Audio('http://108.88.140.124:43367/stream'); // Update with your stream URL
-        audio.volume = document.getElementById('volumeSlider').value / 100;
-    }
-
-    if (isPlaying) {
-        audio.pause();
-        playBtn.textContent = '▶️';
-        isPlaying = false;
-    } else {
-        audio.play().catch(e => {
-            console.error('Playback failed:', e);
-        });
-        playBtn.textContent = '⏸️';
-        isPlaying = true;
-    }
-}
 
 document.getElementById('volumeSlider').addEventListener('input', function(e) {
     if (audio) {
@@ -504,6 +459,3 @@ randomizeFooter();
     </script>
 </body>
 </html>
-
-
-
