@@ -36,7 +36,7 @@
 </head>
 <body>
     <div class="container">
-        <video id="video" controls autoplay muted></video>
+        <video id="video" controls autoplay></video>
         <div id="status" class="status"></div>
     </div>
 
@@ -107,7 +107,22 @@
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
                     retryCount = 0;
                     showStatus('');
-                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                    // Try to play with sound first
+                    video.muted = false;
+                    video.play().catch(e => {
+                        // If blocked, try muted then unmute
+                        console.log('Autoplay with sound blocked, trying muted...');
+                        video.muted = true;
+                        video.play().then(() => {
+                            showStatus('Click to unmute');
+                            // Unmute on first click
+                            video.addEventListener('click', function unmute() {
+                                video.muted = false;
+                                showStatus('');
+                                video.removeEventListener('click', unmute);
+                            }, { once: true });
+                        });
+                    });
                 });
 
                 hls.on(Hls.Events.ERROR, function(event, data) {
