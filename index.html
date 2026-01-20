@@ -24,30 +24,98 @@
             width: 100%;
             height: auto;
         }
+        .status {
+            color: #fff;
+            text-align: center;
+            margin-top: 10px;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
     <div class="video-container">
         <video id="video" class="video-js vjs-big-play-centered" controls preload="auto"></video>
+        <div id="status" class="status"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"></script>
     <script>
+        const streamUrl = 'https://stream.pizzaspies.pizza/mystream/index.m3u8';
+        let retryCount = 0;
+        let retryTimeout = null;
+        const maxRetries = 999; // Essentially unlimited
+        const retryDelay = 3000; // Wait 3 seconds between retries
+
         var player = videojs('video', {
             autoplay: 'muted',
             controls: true,
             fluid: true,
-            liveui: true
+            liveui: true,
+            html5: {
+                vhs: {
+                    overrideNative: true,
+                    enableLowInitialPlaylist: true,
+                    smoothQualityChange: true,
+                    handlePartialData: true
+                },
+                nativeAudioTracks: false,
+                nativeVideoTracks: false
+            }
         });
 
-        player.src({
-            src: 'https://stream.pizzaspies.pizza/mystream/index.m3u8',
-            type: 'application/x-mpegURL'
-        });
+        function loadStream() {
+            player.src({
+                src: streamUrl,
+                type: 'application/x-mpegURL'
+            });
+        }
+
+        function showStatus(message) {
+            document.getElementById('status').textContent = message;
+        }
+
+        function retryStream() {
+            if (retryTimeout) {
+                clearTimeout(retryTimeout);
+            }
+
+            retryCount++;
+            showStatus(`Connection lost. Retrying... (attempt ${retryCount})`);
+            
+            retryTimeout = setTimeout(() => {
+                console.log(`Retry attempt ${retryCount}`);
+                player.reset();
+                loadStream();
+                player.play();
+            }, retryDelay);
+        }
 
         player.on('error', function() {
-            console.log('Error:', player.error());
+            const error = player.error();
+            console.log('Error occurred:', error);
+            
+            // Don't retry on fatal errors that won't fix themselves
+            if (error && error.code === 4) {
+                showStatus('Stream not available');
+                return;
+            }
+            
+            retryStream();
         });
+
+        player.on('loadeddata', function() {
+            retryCount = 0;
+            showStatus('');
+            console.log('Stream loaded successfully');
+        });
+
+        player.on('playing', function() {
+            retryCount = 0;
+            showStatus('');
+        });
+
+        // Initial load
+        loadStream();
     </script>
 </body>
 </html>
