@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Stream</title>
-    <link href="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video-js.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         body {
             margin: 0;
@@ -14,108 +14,176 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: Arial, sans-serif;
         }
-        .video-container {
+        .container {
             width: 100%;
             max-width: 1280px;
             padding: 20px;
         }
-        .video-js {
+        video {
             width: 100%;
             height: auto;
+            background: #000;
         }
         .status {
             color: #fff;
             text-align: center;
             margin-top: 10px;
-            font-family: Arial, sans-serif;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
-    <div class="video-container">
-        <video id="video" class="video-js vjs-big-play-centered" controls preload="auto"></video>
+    <div class="container">
+        <video id="video" controls autoplay muted></video>
         <div id="status" class="status"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/video.js@8.10.0/dist/video.min.js"></script>
     <script>
+        const video = document.getElementById('video');
         const streamUrl = 'https://stream.pizzaspies.pizza/mystream/index.m3u8';
+        let hls;
         let retryCount = 0;
-        let retryTimeout = null;
-        const maxRetries = 999; // Essentially unlimited
-        const retryDelay = 3000; // Wait 3 seconds between retries
+        let retryTimeout;
 
-        var player = videojs('video', {
-            autoplay: 'muted',
-            controls: true,
-            fluid: true,
-            liveui: true,
-            html5: {
-                vhs: {
-                    overrideNative: true,
-                    enableLowInitialPlaylist: true,
-                    smoothQualityChange: true,
-                    handlePartialData: true
-                },
-                nativeAudioTracks: false,
-                nativeVideoTracks: false
-            }
-        });
-
-        function loadStream() {
-            player.src({
-                src: streamUrl,
-                type: 'application/x-mpegURL'
-            });
+        function showStatus(msg) {
+            document.getElementById('status').textContent = msg;
         }
 
-        function showStatus(message) {
-            document.getElementById('status').textContent = message;
-        }
-
-        function retryStream() {
-            if (retryTimeout) {
-                clearTimeout(retryTimeout);
+        function initPlayer() {
+            if (hls) {
+                hls.destroy();
             }
 
-            retryCount++;
-            showStatus(`Connection lost. Retrying... (attempt ${retryCount})`);
-            
-            retryTimeout = setTimeout(() => {
-                console.log(`Retry attempt ${retryCount}`);
-                player.reset();
-                loadStream();
-                player.play();
-            }, retryDelay);
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true,
+                    backBufferLength: 90,
+                    
+                    // Very forgiving retry settings
+                    manifestLoadingTimeOut: 20000,
+                    manifestLoadingMaxRetry: 10,
+                    manifestLoadingRetryDelay: 1000,
+                    manifestLoadingMaxRetryTimeout: 64000,
+                    
+                    levelLoadingTimeOut: 20000,
+                    levelLoadingMaxRetry: 10,
+                    levelLoadingRetryDelay: 1000,
+                    levelLoadingMaxRetryTimeout: 64000,
+                    
+                    fragLoadingTimeOut: 20000,
+                    fragLoadingMaxRetry: 10,
+                    fragLoadingRetryDelay: 1000,
+                    fragLoadingMaxRetryTimeout: 64000,
+                    
+                    startFragPrefetch: true,
+                    testBandwidth: true,
+                    
+                    // More aggressive buffering
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60,
+                    maxBufferSize: 60 * 1000 * 1000,
+                    maxBufferHole: 0.5,
+                    
+                    liveSyncDuration: 3,
+                    liveMaxLatencyDuration: 10,
+                    liveDurationInfinity: true,
+                    
+                    // Handle discontinuities better
+                    nudgeOffset: 0.1,
+                    nudgeMaxRetry: 10,
+                    maxFragLookUpTolerance: 0.25,
+                    
+                    // Auto-recover from errors
+                    enableSoftwareAES: true
+                });
+
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    retryCount = 0;
+                    showStatus('');
+                    video.play().catch(e => console.log('Autoplay prevented:', e));
+                });
+
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.log('HLS Error:', data.type, data.details, data.fatal);
+                    
+                    if (data.fatal) {
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.log('Network error, attempting recovery...');
+                                retryCount++;
+                                showStatus(`Connection issue, retrying... (${retryCount})`);
+                                
+                                setTimeout(() => {
+                                    hls.startLoad();
+                                }, 3000);
+                                break;
+                                
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.log('Media error, attempting recovery...');
+                                retryCount++;
+                                showStatus(`Stream error, recovering... (${retryCount})`);
+                                hls.recoverMediaError();
+                                break;
+                                
+                            default:
+                                console.log('Fatal error, reinitializing...');
+                                retryCount++;
+                                showStatus(`Reconnecting... (${retryCount})`);
+                                
+                                setTimeout(() => {
+                                    initPlayer();
+                                }, 3000);
+                                break;
+                        }
+                    }
+                });
+
+                hls.on(Hls.Events.FRAG_LOADED, function() {
+                    if (retryCount > 0) {
+                        retryCount = 0;
+                        showStatus('');
+                    }
+                });
+
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Native HLS support (Safari)
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    retryCount = 0;
+                    showStatus('');
+                    video.play();
+                });
+                
+                video.addEventListener('error', function() {
+                    retryCount++;
+                    showStatus(`Reconnecting... (${retryCount})`);
+                    setTimeout(() => {
+                        video.src = streamUrl;
+                        video.load();
+                    }, 3000);
+                });
+            }
         }
 
-        player.on('error', function() {
-            const error = player.error();
-            console.log('Error occurred:', error);
-            
-            // Don't retry on fatal errors that won't fix themselves
-            if (error && error.code === 4) {
-                showStatus('Stream not available');
-                return;
+        // Start the player
+        initPlayer();
+
+        // Visibility change handler - reload when tab becomes visible
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden && hls) {
+                console.log('Tab visible again, checking stream...');
+                if (video.paused) {
+                    video.play().catch(e => console.log('Play failed:', e));
+                }
             }
-            
-            retryStream();
         });
-
-        player.on('loadeddata', function() {
-            retryCount = 0;
-            showStatus('');
-            console.log('Stream loaded successfully');
-        });
-
-        player.on('playing', function() {
-            retryCount = 0;
-            showStatus('');
-        });
-
-        // Initial load
-        loadStream();
     </script>
 </body>
 </html>
