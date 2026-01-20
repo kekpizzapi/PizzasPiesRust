@@ -10,117 +10,93 @@
             margin: 0;
             padding: 0;
             background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
             font-family: Arial, sans-serif;
         }
         .container {
             width: 100%;
-            max-width: 1280px;
-            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .instructions {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 15px 20px;
+            border-bottom: 2px solid #333;
+            font-size: 14px;
+            display: none;
+        }
+        .instructions.show {
+            display: block;
+        }
+        .instructions strong {
+            color: #4da6ff;
+        }
+        .lock-icon {
+            display: inline-block;
+            background: #666;
+            color: #fff;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin: 0 3px;
+        }
+        .video-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
         }
         video {
             width: 100%;
+            max-width: 1280px;
             height: auto;
             background: #000;
         }
         .status {
             color: #fff;
             text-align: center;
-            margin-top: 10px;
+            padding: 10px;
             font-size: 14px;
-        }
-        .unmute-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            z-index: 1000;
-            padding: 20px;
-            text-align: center;
-        }
-        .unmute-button {
-            background: #fff;
-            color: #000;
-            padding: 20px 40px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-        .unmute-button:hover {
-            background: #f0f0f0;
-        }
-        .firefox-instructions {
-            color: #fff;
-            font-size: 14px;
-            max-width: 500px;
-            line-height: 1.6;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        .firefox-instructions strong {
-            color: #4da6ff;
-        }
-        .video-wrapper {
-            position: relative;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div id="instructions" class="instructions">
+            Click the <span class="lock-icon">🔒</span> permissions button in your address bar → 
+            Find <strong>"Autoplay"</strong> → 
+            Select <strong>"Allow Audio and Video"</strong>
+        </div>
         <div class="video-wrapper">
             <video id="video" controls autoplay></video>
-            <div id="unmute-overlay" class="unmute-overlay" style="display: none;">
-                <button class="unmute-button">🔊 Click to Enable Sound</button>
-                <div class="firefox-instructions" id="firefox-help" style="display: none;">
-                    <strong>Firefox Users:</strong><br>
-                    For permanent audio, click the <strong>🔒 lock icon</strong> in your address bar → 
-                    Find <strong>"Autoplay"</strong> → Select <strong>"Allow Audio and Video"</strong>
-                </div>
-            </div>
         </div>
         <div id="status" class="status"></div>
     </div>
 
     <script>
         const video = document.getElementById('video');
-        const unmuteOverlay = document.getElementById('unmute-overlay');
+        const instructions = document.getElementById('instructions');
         const streamUrl = 'https://stream.pizzaspies.pizza/mystream/index.m3u8';
         let hls;
         let retryCount = 0;
-        let retryTimeout;
-
-        // Check if user has previously allowed audio
-        const hasAllowedAudio = localStorage.getItem('audioAllowed') === 'true';
+        let audioBlocked = false;
 
         function showStatus(msg) {
             document.getElementById('status').textContent = msg;
         }
 
-        function enableAudio() {
-            video.muted = false;
-            unmuteOverlay.style.display = 'none';
-            localStorage.setItem('audioAllowed', 'true');
-            video.play();
+        function checkAudioPermission() {
+            // Periodically check if audio is working
+            setInterval(() => {
+                if (audioBlocked && !video.muted && video.volume > 0 && !video.paused) {
+                    // Audio is working now
+                    audioBlocked = false;
+                    instructions.classList.remove('show');
+                }
+            }, 1000);
         }
-
-        // Unmute overlay click handler
-        unmuteOverlay.addEventListener('click', enableAudio);
 
         function initPlayer() {
             if (hls) {
@@ -134,7 +110,6 @@
                     lowLatencyMode: true,
                     backBufferLength: 90,
                     
-                    // Very forgiving retry settings
                     manifestLoadingTimeOut: 20000,
                     manifestLoadingMaxRetry: 10,
                     manifestLoadingRetryDelay: 1000,
@@ -153,7 +128,6 @@
                     startFragPrefetch: true,
                     testBandwidth: true,
                     
-                    // More aggressive buffering
                     maxBufferLength: 30,
                     maxMaxBufferLength: 60,
                     maxBufferSize: 60 * 1000 * 1000,
@@ -163,12 +137,10 @@
                     liveMaxLatencyDuration: 10,
                     liveDurationInfinity: true,
                     
-                    // Handle discontinuities better
                     nudgeOffset: 0.1,
                     nudgeMaxRetry: 10,
                     maxFragLookUpTolerance: 0.25,
                     
-                    // Auto-recover from errors
                     enableSoftwareAES: true
                 });
 
@@ -179,26 +151,16 @@
                     retryCount = 0;
                     showStatus('');
                     
-                    // If user previously allowed audio, play unmuted
-                    if (hasAllowedAudio) {
-                        video.muted = false;
-                        video.play().catch(e => {
-                            // Still blocked, show overlay
-                            video.muted = true;
-                            video.play();
-                            unmuteOverlay.style.display = 'flex';
-                        });
-                    } else {
-                        // First time - try unmuted first
-                        video.muted = false;
-                        video.play().catch(e => {
-                            // Blocked, play muted and show overlay
-                            console.log('Autoplay blocked, showing unmute prompt');
-                            video.muted = true;
-                            video.play();
-                            unmuteOverlay.style.display = 'flex';
-                        });
-                    }
+                    video.muted = false;
+                    video.play().catch(e => {
+                        console.log('Autoplay blocked');
+                        audioBlocked = true;
+                        instructions.classList.add('show');
+                        
+                        // Play muted so video still works
+                        video.muted = true;
+                        video.play();
+                    });
                 });
 
                 hls.on(Hls.Events.ERROR, function(event, data) {
@@ -244,12 +206,18 @@
                 });
 
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Native HLS support (Safari)
                 video.src = streamUrl;
                 video.addEventListener('loadedmetadata', function() {
                     retryCount = 0;
                     showStatus('');
-                    video.play();
+                    
+                    video.muted = false;
+                    video.play().catch(e => {
+                        audioBlocked = true;
+                        instructions.classList.add('show');
+                        video.muted = true;
+                        video.play();
+                    });
                 });
                 
                 video.addEventListener('error', function() {
@@ -265,8 +233,17 @@
 
         // Start the player
         initPlayer();
+        checkAudioPermission();
 
-        // Visibility change handler - reload when tab becomes visible
+        // Listen for user interaction with video controls
+        video.addEventListener('volumechange', function() {
+            if (!video.muted && audioBlocked) {
+                audioBlocked = false;
+                instructions.classList.remove('show');
+            }
+        });
+
+        // Visibility change handler
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden && hls) {
                 console.log('Tab visible again, checking stream...');
