@@ -38,12 +38,15 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             z-index: 1000;
+            padding: 20px;
+            text-align: center;
         }
         .unmute-button {
             background: #fff;
@@ -55,9 +58,23 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
         }
         .unmute-button:hover {
             background: #f0f0f0;
+        }
+        .firefox-instructions {
+            color: #fff;
+            font-size: 14px;
+            max-width: 500px;
+            line-height: 1.6;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .firefox-instructions strong {
+            color: #4da6ff;
         }
         .video-wrapper {
             position: relative;
@@ -70,6 +87,11 @@
             <video id="video" controls autoplay></video>
             <div id="unmute-overlay" class="unmute-overlay" style="display: none;">
                 <button class="unmute-button">🔊 Click to Enable Sound</button>
+                <div class="firefox-instructions" id="firefox-help" style="display: none;">
+                    <strong>Firefox Users:</strong><br>
+                    For permanent audio, click the <strong>🔒 lock icon</strong> in your address bar → 
+                    Find <strong>"Autoplay"</strong> → Select <strong>"Allow Audio and Video"</strong>
+                </div>
             </div>
         </div>
         <div id="status" class="status"></div>
